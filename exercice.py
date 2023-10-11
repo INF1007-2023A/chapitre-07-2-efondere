@@ -12,6 +12,12 @@ def get_fibonacci_number(index):
 		return 1
 	else:
 		return get_fibonacci_number(index - 1) + get_fibonacci_number(index - 2)
+	## OU:
+	# return (
+	# 	0 if index == 0 else
+	# 	1 if index == 1 else
+	# 	get_fibonacci_number(index = 1) + get_fibonacci_number(index - 2)
+	# )
 
 def get_fibonacci_sequence(count):
 	numbers = [0, 1]
@@ -24,19 +30,21 @@ def get_sorted_dict_by_decimals(dictionary):
 	return dict(sorted(dictionary.items(), key=lambda item: item[1] - round(item[1])))
 
 def fibonacci_numbers(length):
-	prev_num_1 = 0
-	prev_num_2 = 1
-	yield prev_num_1
-	yield prev_num_2
-	for _ in range(length - 2):
-		new_num = prev_num_1 + prev_num_2
-		prev_num_1 = prev_num_2
-		prev_num_2 = new_num
+	init_values = [0, 1] # transform this into array
+	# also take into account length < 2
+	for value in init_values[0:length]:
+		yield value
+
+	last_elems = deque(init_values) # use deque here
+	for _ in range(len(init_values), length): # going from 2 to length makes more sense here
+		new_num = last_elems[-1] + last_elems[-2] # also makes more sense here (closer to math notation)
+		last_elems.append(new_num) # this is why deque is easier to work with
+		last_elems.popleft()
 		yield new_num
 
 def build_recursive_sequence_generator(initial_values, function, save_all=False):
 	def recursive_func(length):
-		for i in range(len(initial_values)):
+		for i in range(len(initial_values)): # ou for value in initial_values[0:length]: yield value
 			if i >= length:
 				return
 			yield initial_values[i]
@@ -89,18 +97,10 @@ if __name__ == "__main__":
 		print(fi, end=" ")
 	print("\n")
 
-	def lucas_gen(prev_elems):
-		return prev_elems[-1] + prev_elems[-2]
-
-	def perrin_gen(prev_elems):
-		return prev_elems[-2] + prev_elems[-3]
-
-	def hofstadter_gen(prev_elems):
-		return prev_elems[-prev_elems[-1]] + prev_elems[-prev_elems[-2]]
-
-	lucas = build_recursive_sequence_generator([2, 1], lucas_gen)
+	# la consigne disait d'utiliser des fonctions lambda a la place...
+	lucas = build_recursive_sequence_generator([2, 1], lambda prev_elems: prev_elems[-1] + prev_elems[-2])
 	print(f"Lucas : {[elem for elem in lucas(10)]}")
-	perrin = build_recursive_sequence_generator([3, 0, 2], perrin_gen)
+	perrin = build_recursive_sequence_generator([3, 0, 2], lambda prev_elems: prev_elems[-2] + prev_elems[-3])
 	print(f"Perrin : {[elem for elem in perrin(10)]}")
-	hofstadter_q = build_recursive_sequence_generator([1, 1], hofstadter_gen, True)
+	hofstadter_q = build_recursive_sequence_generator([1, 1], lambda prev_elems: prev_elems[-prev_elems[-1]] + prev_elems[-prev_elems[-2]], True)
 	print(f"Hofstadter-Q : {[elem for elem in hofstadter_q(10)]}")
